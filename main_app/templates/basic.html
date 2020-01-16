@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>
+        {% block title %}
+        {{ pagetitle }}
+        {% endblock %}
+    </title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" >
+
+</head>
+<body>
+    <header>
+        {% block menu %}
+        {% include 'menu.html' %}
+        {% endblock %}
+    </header>
+    <!-- /header -->
+    <div class="container">
+        <main>
+        {% block alert %} {% endblock %}
+
+        <div class="card text-white bg-secondary my-3 py-2 text-center">
+          <div class="card-body">
+            <p class="text-white m-0"> {{ main_message }}</p>
+          </div>
+        </div>
+
+            {% block main %}
+            {% endblock %}
+        </main>
+    </div>
+    <footer class="footer pt-4 pb-3 bg-dark">
+    {% block footer %}
+        <div class="container">
+                <p class="text-muted align-bottom"> <a href="/about/" title="" class="text-light">&copy; BackPacMan Team</a> - The Two Coders.</p>
+        </div>
+    {% endblock %}
+    </footer>
+
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/popper.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    {% block custom_js %} {% endblock %}
+</body>
+</html>

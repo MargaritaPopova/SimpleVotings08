@@ -1,0 +1,46 @@
+{% extends "basic.html" %}
+{% block alert %}
+<div class="mb-5"></div>
+
+{% endblock %}
+{% block main %}
+
+<h2>Создайте свое голосование!</h2>
+
+{% block custom_js %}
+    {% load static %}
+    <script src="{% static 'js/create.js' %}"></script>
+{% endblock %}
+
+<form method="POST">
+    {% csrf_token %}
+    <input type="hidden" id="count" name="count" value="0">
+    <div class="card w-50 mb-5 border-primary" >
+        <div class="card-body">
+            <h5 class="card-title">
+                <input type="text" id="title" name="title" placeholder="Заголовок опроса">
+            </h5>
+            <hr>
+            <div class="my-2">
+                <label>Тип голосования:</label>
+                 <select id="myList" name="voting_type" class="small">
+                   <option value="radio">С единственным выбором</option>
+                   <option value="checkbox">С множественным выбором</option>
+                   <option value="text_input">Свободный ответ</option>
+                 </select>
+            </div>
+            <div id="options_container">
+                <p class="card-text mb-2">
+                    <input type="hidden">
+                    <button type="button" id='adder' class="btn btn-outline-success btn-sm" onclick="add_option()">Добавить варианты ответа</button>
+                </p>
+            </div>
+
+        </div>
+
+        <div class="card-footer">
+            <input type="submit" class="btn btn-secondary btn-lg float-right" value="Создать опрос">
+        </div>
+    </div>
+</form>
+{% endblock %}

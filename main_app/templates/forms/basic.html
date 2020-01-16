@@ -1,0 +1,19 @@
+<div class="col-md-6 mb-5">
+
+<form method="{% block method %}{{ method|default:"POST" }}{% endblock %}"
+    action="{% block action %}{{ action|default:"/" }}{% endblock %}">
+    <div class="card border-primary">
+        <div class="card-body">
+
+    {% csrf_token %}
+    {% block before %}{% endblock %}
+    {% block main %}{% endblock %}
+        </div>
+        {% block after %}
+        {% if not hide_submit %}
+            <input type="submit" value="Голосовать">
+        {% endif %}
+        {% endblock %}
+    </div>
+</form>
+</div>

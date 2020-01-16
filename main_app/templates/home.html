@@ -1,0 +1,22 @@
+{% extends "basic.html" %}
+{% block alert %}
+<div class="alert alert-success mt-3" role="alert">
+    <p>{{ auth_msg }}</p>
+</div>
+{% endblock %}
+{% block main %}
+
+
+<div class="row">
+
+{% for voting in votings %}
+    {% if voting.type == 'text_input' %}
+      {% include 'forms/voting_text.html' with action="/vote/" %}
+   {% else %}
+      {% include 'forms/voting_basic.html' with action="/vote/" %}
+   {% endif %}
+{% endfor %}
+
+</div>
+<hr>
+{% endblock %}

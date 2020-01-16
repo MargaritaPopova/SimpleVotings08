@@ -1,0 +1,58 @@
+{% extends './basic.html' %}
+{% block before %}
+    <h6 class="card-subtitle mb-2 text-muted">Автор: {{ voting.author }}</h6>
+    <h4 class="card-title"><a href={{ voting.voting_view }} class="text-dark">  {{ voting.question }}</a></h4>
+    <input type="hidden" name="voting_id" value="{{ voting.id }}">
+{% endblock %}
+{% block main %}
+    {% if voting.type == 'text_input' %}
+        <p><label {% if user.id in voting.users %}title="(Ответили: {{ voting.users|length }})"{% endif %}>
+            <input type="text"
+               {% if user.id in voting.users %}disabled{% endif %}
+               name="answer" placeholder="Ваш ответ"></label>
+
+    {% else %}
+        <div class="container-fluid">
+            {% for option in voting.options %}
+                <div class="row">
+                    <div class="col-md-3    ">
+                        <label {% if user.id in voting.users %}title="{{ option.get_votes_count_t }}"{% endif %}>
+                        <input type="{{ voting.type }}"
+                           {% if user.id in voting.users %}disabled{% endif %}
+                           {% if user.id in option.users %}checked="checked"{% endif %}
+                           name="{% if voting.type == 'radio' %}{{ voting.id }}{% else %}{{ option.id }}{% endif %}"
+                           value="{% if user.id in option.users %}<u>{{option.option}}</u>{% else %}{{option.option}}{% endif %}"
+                           >{% if user.id in option.users %}<u>{{option.option}}</u>{% else %}{{option.option}}{% endif %}</label>
+                    </div>
+                    {% if user.id in voting.users %}
+                        <div class="col-md-8">
+                            <div class="progress"
+                                 title="{{ option.get_votes_count_t }}">
+                                <div class="progress-bar text-light"
+                                     role="progressbar"
+                                     style="width: {{ option.get_votes_percentage }}%;"
+                                     aria-valuenow="{{ option.get_votes_percentage }}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100">{{ option.get_votes_percentage }}%</div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% empty %}
+                {{ onempty_message|default:"Пустое голосование" }}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}
+{% block after %}
+    <div class="card-footer">
+
+    {% if user.id not in voting.users %}
+        <input type="submit" class="btn btn-secondary btn-sm" value="Голосовать">
+    {% endif %}
+    {% if user.id == voting.author_id %}
+        <input type="submit" class="btn btn-outline-danger btn-sm float-right" name="delete" value="Удалить">
+        <input type="submit" class="btn btn-outline-success btn-sm float-right mr-1" name="edit" value="Редактировать">
+    {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "basic.html" %}
+{% block title%}Регистрация{%endblock%}
+{% block main %}
+<div class="container">
+  <h2>Регистрация</h2>
+  <div class="contact-info-content">
+      <div class="row">
+          <div class="col-md-6">
+              <form method="POST" class="contact-form">
+                  <div class="form-group">
+                      <div class="row">
+                          {% csrf_token %}
+                          {% for field in form %}
+                              <div class="col-xs-12">
+                                  <strong>{{ field.label_tag }}</strong><br>
+                                  {{ field }}
+                                  {% if field.help_text %}
+                                  <br><small style="color: grey">{{ field.help_text }}</small>
+                                    {% endif %}
+                                        {% for error in field.errors %}
+                                            <p style="color: red">{{ error }}</p>
+                                        {% endfor %}
+                              </div>
+                          {% endfor %}
+                      </div>
+                  </div>
+                  <button type="submit" class="btn btn-dark btn-lg">Зарегистрироваться</button>
+              </form>
+          </div>
+      </div>
+  </div>
+  <br><hr>
+  <p>Уже есть аккаунт? <a href="/login/">Войдите</a>
+  <br><hr><a href="/">На главную</a>
+</div>
+{%endblock%}

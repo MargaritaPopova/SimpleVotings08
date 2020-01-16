@@ -1,0 +1,17 @@
+{% extends "basic.html" %}
+{% block alert %}
+{% if auth_no %}
+        <div class="alert alert-warning mt-3">
+            <p>{{ auth_no }} </p>
+        </div>
+    {% endif %}
+    {% if auth_yes %}
+        <div class="alert alert-success mt-3">
+            <p>{{ auth_yes }} </p>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+
+{% endblock %}

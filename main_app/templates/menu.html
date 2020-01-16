@@ -1,0 +1,46 @@
+{% if menu %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="#">Simple Votings 08</a>
+
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+
+            {% for item in menu.0 %}
+          <li class="nav-item active">
+            <a class="nav-link" href="{{item.url}}">{{ item.name }}
+              <span class="sr-only">(current)</span>
+            </a>
+          </li>
+            {% endfor %}
+
+             {% for item in menu %}
+                {% if item.dropdown %}
+                    <div class="dropdown">
+                    <li class="nav-item">
+                        <a class="nav-link dropdown-toggle"
+                           id="dropdownMenuButton" data-toggle="dropdown"
+                           aria-haspopup="true" aria-expanded="false" href="{{ item.url }}">{{ item.name }}</a>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                            {% for i in item.dropdown %}
+                                <a class="dropdown-item" href="{{ i.url }}">{{ i.name }} </a>
+                            {% endfor %}
+                            </div>
+                    </li>
+                    </div>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{item.url}}">{{ item.name }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+{% endif %}

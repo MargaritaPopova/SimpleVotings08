@@ -1,0 +1,33 @@
+{% extends './basic.html' %}
+{% block before %}
+    <h6 class="card-subtitle mb-2 text-muted">Автор: {{ voting.author }}</h6>
+    <h4 class="card-title"><a href={{ voting.voting_view }} class="text-dark">  {{ voting.question }}</a></h4>
+    <input type="hidden" name="voting_id" value="{{ voting.id }}">
+{% endblock %}
+
+{% block main %}
+    {% if user.id not in voting.users_text %}
+        <input type="text"
+           {% if user.id in voting.users %}disabled{% endif %}
+           name="answer" placeholder="Ваш ответ"></label>
+    {% else %}
+        <p class="card-text"><strong>Ваш ответ:</strong> </p>
+            <p>{{ user_input }} </p>
+        <p class="card-text"> <strong>Ответы других пользователей: </strong></p>
+            {% for a in answers %}
+                <p>{{ a.user }}: {{ a.answer }}</p>
+            {% endfor %}
+    {% endif %}
+{% endblock %}
+{% block after %}
+    <div class="card-footer">
+
+    {% if user.id not in voting.users_text %}
+        <input type="submit" class="btn btn-secondary btn-sm" value="Голосовать">
+    {% endif %}
+    {% if user.id == voting.author_id %}
+        <input type="submit" class="btn btn-outline-danger btn-sm float-right" name="delete" value="Удалить">
+        <input type="submit" class="btn btn-outline-success btn-sm float-right mr-1" name="edit" value="Редактировать">
+    {% endif %}
+    </div>
+{% endblock %}
