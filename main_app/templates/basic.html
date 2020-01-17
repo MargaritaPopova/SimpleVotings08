@@ -23,7 +23,9 @@
     <!-- /header -->
     <div class="container">
         <main>
-        {% block alert %} {% endblock %}
+        {% block alert %}
+            {% include 'greeting.html' %}
+        {% endblock %}
 
         <div class="card text-white bg-secondary my-3 py-2 text-center">
           <div class="card-body">

@@ -1,0 +1,21 @@
+{% extends "basic.html" %}
+
+{% block main %}
+
+<h3>Редактировать профиль</h3>
+
+<form method="POST">
+    {% csrf_token %}
+    <div class="card w-50 mb-5 border-primary" >
+        <div class="card-body">
+            <hr>
+            {{ form.as_p }}
+            <p><a href="/password/">Изменить пароль</a> </p>
+        </div>
+
+        <div class="card-footer">
+            <input type="submit" class="btn btn-secondary btn-lg float-right" value="Сохранить">
+        </div>
+    </div>
+</form>
+{% endblock %}

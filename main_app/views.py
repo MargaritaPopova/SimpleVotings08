@@ -1,11 +1,12 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect
+from django.urls import reverse
 
 from . import models
-from .forms import VoteForm
+from .forms import EditProfileForm
 
-from django.contrib.auth import login, authenticate
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login, authenticate, update_session_auth_hash
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 
@@ -53,12 +54,25 @@ def get_menu_context(request):
          ]},
         {'url': '/', 'name': 'Моя страница',
          'dropdown': [
+             {'url': '/profile/'+str(request.user.id), 'name': 'Профиль'},
+             {'url': '/edit_profile/', 'name': 'Редактировать'},
              {'url': '/my_votings/', 'name': 'Посмотреть мои'},
              {'url': '/create/', 'name': 'Создать голосование'},
          ]},
         {'url': '/about/', 'name': 'О нас'},
     ]
     return menu
+
+
+def greeting(request):
+    if request.user.is_authenticated:
+        if request.user.first_name:
+            auth_msg = 'Добро пожаловать, {}!'.format(request.user.first_name)
+        else:
+            auth_msg = 'Добро пожаловать, {}!'.format(request.user)
+    else:
+        auth_msg = 'Вы вошли как гость. Чтобы продолжить, нужно авторизоваться'
+    return auth_msg
 
 
 @login_required
@@ -69,13 +83,11 @@ def home(request):
         'menu': get_menu_context(request),
         'user': request.user,
         'loginform': AuthenticationForm(),
-        'main_message': 'Здесь отображаются все голосования'
+        'main_message': 'Здесь отображаются все голосования',
+        'auth_msg': greeting(request)
     }
     if False and request:
         context['vote_errors'] = request.errors.vote
-    if request.user.is_authenticated:
-        context['auth_msg'] = 'Добро пожаловать, {}!'.format(context['user'])
-
 
     return render(request, 'home.html', context)
 
@@ -85,13 +97,10 @@ def index(request):
         'pagetitle': 'Стартовая',
         'menu': get_menu_context(request),
         'msg': 'Это стартовая страница',
-        'main_message': 'Приветствуем!'
+        'main_message': 'Приветствуем!',
+        'auth_msg': greeting(request)
 
     }
-    if not request.user.is_authenticated:
-        context['auth_no'] = 'Вы вошли как гость. Чтобы продолжить, нужно авторизоваться'
-    else:
-        context['auth_yes'] = 'Добро пожаловать, {}!'.format(request.user)
     return render(request, 'index.html', context)
 
 
@@ -204,21 +213,22 @@ def vote(request):
 
 def voting(request, voting):
     context = {'answers': []}
-    try:
-        v = models.Voting.objects.get(id=voting)
+    v = models.Voting.objects.get(id=voting)
+    if v:
         if v.type == 'text_input':
             ans = models.TextOption.objects.filter(voting_id=voting)
-            for a in ans:
-                context['answers'].append({
-                    'user': User.objects.get(id=a.user_id).username,
-                    'answer': a.answer
-                })
-            context['user_input'] = ans.get(user_id=request.user.id).answer
-    except:
-        v = None
+            if len(ans):
+                for a in ans:
+                    context['answers'].append({
+                        'user': User.objects.get(id=a.user_id).username,
+                        'answer': a.answer
+                    })
+                context['user_input'] = ans.get(user_id=request.user.id).answer
+
     context['pagetitle'] = 'Просмотр голосования'
     context['voting'] = v
     context['menu'] = get_menu_context(request)
+    context['auth_msg'] = greeting(request)
     context['main_message'] = 'Просмотр голосования'
 
     return render(request, 'voting.html', context)
@@ -248,12 +258,13 @@ def create(request):
             o.voting = v
             o.save()
 
-        return HttpResponseRedirect('/home/')
+        return HttpResponseRedirect(v.voting_view())
 
     context = {
         'menu': get_menu_context(request),
         'pagetitle': 'Создание голосования',
-        'main_message': 'Создание голосования'
+        'main_message': 'Создание голосования',
+        'auth_msg': greeting(request)
     }
     return render(request, 'create.html', context)
 
@@ -266,12 +277,11 @@ def my_votings(request):
         'menu': get_menu_context(request),
         'user': request.user,
         'loginform': AuthenticationForm(),
-        'main_message': 'Мои голосования'
+        'main_message': 'Мои голосования',
+        'auth_msg': greeting(request)
     }
     if False and request:
         context['vote_errors'] = request.errors.vote
-    if request.user.is_authenticated:
-        context['auth_msg'] = 'Добро пожаловать, {}!'.format(context['user'])
 
     return render(request, 'my_votings.html', context)
 
@@ -284,6 +294,7 @@ def edit(request, id):
         'menu': get_menu_context(request),
         'user': request.user,
         'main_message': 'Редактировать голосование',
+        'auth_msg': greeting(request),
         'result': '',
         'id': id
     }
@@ -315,7 +326,65 @@ def edit(request, id):
                 o.voting = context['voting']
                 o.save()
 
+            return redirect(context['voting'].voting_view())
+
     return render(request, 'edit.html', context)
+
+
+def profile(request, id):
+    context = {
+        'pagetitle': 'Мой профиль',
+        'menu': get_menu_context(request),
+        'user': request.user,
+        'main_message': 'Мой профиль',
+        'auth_msg': greeting(request),
+        'id': id
+    }
+    return render(request, 'profile.html', context)
+
+
+def edit_profile(request):
+    context = {
+        'pagetitle': 'Мой профиль',
+        'menu': get_menu_context(request),
+        'user': request.user,
+        'auth_msg': greeting(request),
+        'main_message': 'Мой профиль',
+    }
+    if request.method == 'POST':
+        form = EditProfileForm(request.POST, instance=request.user)
+
+        if form.is_valid():
+            form.save()
+            return redirect('/profile/'+str(context['user'].id))
+    else:
+        form = EditProfileForm(instance=request.user)
+        context['form'] = form
+        return render(request, 'edit_profile.html', context)
+
+
+def change_password(request):
+    context = {
+        'pagetitle': 'Изменить пароль',
+        'menu': get_menu_context(request),
+        'user': request.user,
+        'main_message': 'Изменить пароль',
+        'auth_msg': greeting(request)
+    }
+    if request.method == 'POST':
+        form = PasswordChangeForm(data=request.POST, user=request.user)
+        print(form)
+
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, form.user)
+            return redirect('/profile/'+str(context['user'].id))
+        else:
+            return redirect('/password/')
+    else:
+        form = PasswordChangeForm(user=request.user)
+        context['form'] = form
+        return render(request, 'registration/password.html', context)
 
 
 def get_suffix(x: int, zero: str, one: str, two: str, ):

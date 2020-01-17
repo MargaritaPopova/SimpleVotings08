@@ -58,7 +58,4 @@ class TextOption(models.Model):
     answer = models.CharField(max_length=1000)
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
 
-    def get_username(self):
-        u = User.objects.get(user_id=self.user)
-        return u.username
 

@@ -1,5 +1,4 @@
 <div class="col-md-6 mb-5">
-
 <form method="{% block method %}{{ method|default:"POST" }}{% endblock %}"
     action="{% block action %}{{ action|default:"/" }}{% endblock %}">
     <div class="card border-primary">
@@ -15,5 +14,6 @@
         {% endif %}
         {% endblock %}
     </div>
+    {{ result }}
 </form>
 </div>
