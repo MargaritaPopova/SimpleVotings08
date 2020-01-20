@@ -1,37 +1,37 @@
 {% extends './basic.html' %}
 {% block before %}
-    <h6 class="card-subtitle mb-2 text-muted">Автор: {{ voting.author }}</h6>
-    <h4 class="card-title"><a href={{ voting.voting_view }} class="text-dark">  {{ voting.question }}</a></h4>
-    <input type="hidden" name="voting_id" value="{{ voting.id }}">
+<h6 class="card-subtitle mb-2 text-muted">Автор: {{ voting.author }}</h6>
+<h4 class="card-title"><a href={{ voting.voting_view }} class="text-dark"> {{ voting.question }}</a></h4>
+<input type="hidden" name="voting_id" value="{{ voting.id }}">
 {% endblock %}
 
 {% block main %}
-    {% if user.id not in voting.users_text %}
-        <input type="text"
-           {% if user.id in voting.users %}disabled{% endif %}
-           name="answer" placeholder="Ваш ответ"></label>
-    {% else %}
-        {% if answers %}
-            <p class="card-text"><strong>Ваш ответ:</strong> </p>
-                    <p>{{ user_input }} </p>
-            <p class="card-text"> <strong>Ответы других пользователей: </strong></p>
-                {% for a in answers %}
-                    <p>{{ a.user }}: {{ a.answer }}</p>
-                {% endfor %}
-        {% else %}
-            <a href="{{voting.voting_view}}">Посмотреть ответы</a>
-        {% endif %}
-    {% endif %}
+{% if user.id not in voting.users_text %}
+<input type="text" class="w-100"
+       {% if user.id in voting.users %}disabled{% endif %}
+       name="answer" placeholder="Ваш ответ"></label>
+{% else %}
+{% if answers %}
+<p class="card-text"><strong>Ваш ответ:</strong></p>
+<p>{{ user_input }} </p>
+<p class="card-text"><strong>Ответы других пользователей: </strong></p>
+{% for a in answers %}
+<p>{{ a.user }}: {{ a.answer }}</p>
+{% endfor %}
+{% else %}
+<a href="{{voting.voting_view}}">Посмотреть ответы</a>
+{% endif %}
+{% endif %}
 {% endblock %}
 {% block after %}
-    <div class="card-footer">
+<div class="card-footer">
 
     {% if user.id not in voting.users_text %}
-        <input type="submit" class="btn btn-secondary btn-sm" value="Голосовать">
+    <input type="submit" class="btn btn-secondary btn-sm mt-1" value="Голосовать">
     {% endif %}
     {% if user.id == voting.author_id %}
-        <input type="submit" class="btn btn-outline-danger btn-sm float-right" name="delete" value="Удалить">
-        <input type="submit" class="btn btn-outline-success btn-sm float-right mr-1" name="edit" value="Редактировать">
+    <input type="submit" class="btn btn-outline-success btn-sm mt-1" name="edit" value="Редактировать">
+    <input type="submit" class="btn btn-outline-danger btn-sm mt-1 mr-1" name="delete" value="Удалить">
     {% endif %}
-    </div>
+</div>
 {% endblock %}

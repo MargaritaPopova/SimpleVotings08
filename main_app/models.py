@@ -1,9 +1,7 @@
-from django.contrib.auth.models import User
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
 
-# Create your models here.
-from main_app.views import convert_base, url_alph, get_suffix
+from main_app.views import get_suffix
 
 
 class Voting(models.Model):
@@ -35,15 +33,11 @@ class Options(models.Model):
         return {e.id for e in Vote.objects.filter(voting_id=self.voting_id)}
 
     def get_votes_percentage(self):
-        return int(len(self.votes())/len(self.users())*100)
-
-    # def get_votes_percentage_t(self):
-    #     a = len(self.votes())/len(self.voting.users())*100
-    #     return "{0:.2f}%".format(a) if not a in [0, 25, 50, 75, 100] else f"{int(a)}%"
+        return int(len(self.votes()) / len(self.users()) * 100)
 
     def get_votes_count_t(self):
         a = len(self.votes())
-        return f"(Выбор {a}-{get_suffix(a, 'х', 'го', 'х')} пользовател{get_suffix(a, 'ей', 'я', 'ей')})"\
+        return f"(Выбор {a} пользовател{get_suffix(a, 'ей', 'я', 'ей')})" \
             if a else "(Никто ещё не выбирал этот вариант)"
 
 
@@ -57,5 +51,3 @@ class TextOption(models.Model):
     voting = models.ForeignKey(Voting, on_delete=models.CASCADE)
     answer = models.CharField(max_length=1000)
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
-
-

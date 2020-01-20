@@ -1,10 +1,9 @@
 {% extends 'basic.html' %}
 {% block main %}
 {% block custom_js %}
-    {% load static %}
-    <script src="{% static 'js/create.js' %}"></script>
+{% load static %}
+<script src="{% static 'js/create.js' %}"></script>
 {% endblock %}
-    <h2>Редактируйте голосование номер {{ id }} </h2>
-    {% include 'forms/edit.html' with action='#' %}
+{% include 'forms/edit.html' with action='#' %}
 
 {% endblock %}

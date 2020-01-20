@@ -1,12 +1,12 @@
 {% extends "basic.html" %}
 
 {% block main %}
-<div class="row">
+<div class="card-columns">
 
-{% for voting in votings %}
+    {% for voting in votings %}
 
     {% include 'forms/voting_basic.html' with action="/vote/"%}
-{% endfor %}
+    {% endfor %}
 
 </div>
 <hr>

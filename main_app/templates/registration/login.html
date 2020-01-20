@@ -2,18 +2,20 @@
 {% block title%}Авторизация{%endblock%}
 {% block menu%}{%endblock%}
 {% block main %}
-    <div class="container">
-        <h1>Авторизация</h1>
-        <form action="/login/" method="POST">
-            {% csrf_token %}
+<div class="card bg-light text-sm-center">
+    <h1>Авторизация</h1>
+    <form action="/login/" method="POST">
+        {% csrf_token %}
 
-            <p>{{ form.username.label }} {{ form.username }} {{ form.username.errors }}</p>
-            <p>{{ form.password.label }} {{ form.password }} {{ form.password.errors }}</p>
+        <p>{{ form.username.label }} {{ form.username }} {{ form.username.errors }}</p>
+        <p>{{ form.password.label }} {{ form.password }} {{ form.password.errors }}</p>
 
-            <input type="submit" value="Войти">
-        </form>
-        <hr>
-        <p>Ещё нет аккаунта? <a href="/signup/">Зарегистрируйтесь</a>
-        <br><hr><a href="/">На главную</a>
-    </div>
+        <input type="submit" value="Войти">
+    </form>
+    <hr>
+    <p>Ещё нет аккаунта? <a href="/signup/">Зарегистрируйтесь</a>
+        <br>
+    <hr>
+    <a href="/">На главную</a>
+</div>
 {%endblock%}

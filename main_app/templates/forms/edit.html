@@ -1,45 +1,43 @@
 {% extends 'forms/voting_basic.html' %}
+{% block before %}
+<h6 class="card-title"><input type="text" name="title" value="{{voting.question}}"></h6>
+<input type="hidden" name="voting_id" value="{{ voting.id }}">
+{% endblock %}
 {% block main %}
-    <div class="my-2">
-        <label>Изменить тип голосования:</label>
-         <select id="myList" name="voting_type" class="small">
-           <option value="radio">С единственным выбором</option>
-           <option value="checkbox">С множественным выбором</option>
-           <option value="text_input">Свободный ответ</option>
-         </select>
-    </div>
+<div class="my-2">
+    <label>Изменить тип голосования:</label>
+    <select id="myList" name="voting_type" class="small">
+        <option value="radio">С единственным выбором</option>
+        <option value="checkbox">С множественным выбором</option>
+        <option value="text_input">Свободный ответ</option>
+    </select>
+</div>
 {% csrf_token %}
-    <input type="hidden" id="count" name="count" value="0">
-        <div class="container" id="options_container">
-            {% for option in voting.options %}
-                <div class="row mt-2">
-                    <div class="col-6">
-                        <input type="text" name="{{ option.id }}" value="{{option.option}}">
-                    </div>
-                    <div class="col-2 ml-2">
-                        <input type="submit" class="btn btn-outline-success btn-sm"
-                                name="save_{{option.id}}" value="&#10004;">
-                    </div>
-                    <div class="col-2">
-                        <input type="submit" class="btn btn-outline-danger btn-sm"
-                                name="del_{{option.id}}" value="&#10008;">
-                    </div>
-                </div>
-            {% empty %}
-                {{ onempty_message|default:"Пустое голосование" }}
-            {% endfor %}
-        </div>
-        <div class="container-fluid mt-2">
-            <button type="button" id='adder' class="btn btn-outline-success btn-sm" onclick="add_option()">Добавить варианты ответа</button>
-        </div>
+<input type="hidden" id="count" name="count" value="0">
+<div class="container" id="options_container">
+    {% for option in voting.options %}
+    <div class="row mt-2">
+        <input type="text" name="option_{{ option.id }}" value="{{option.option}}" id="{{option.id}}">
+        <input type="button" class="btn btn-outline-danger btn-sm ml-2"
+               name="del_{{option.id}}" value="X" id="del_{{option.id}}" onclick="delete_option({{option.id}})">
+    </div>
+    {% empty %}
+    {{ onempty_message|default:"Пустое голосование" }}
+    {% endfor %}
+</div>
+<div class=" mt-2">
+    <button type="button" id='adder' class="btn btn-outline-success btn-sm" onclick="add_option()">Добавить варианты
+        ответа
+    </button>
+</div>
 {% endblock %}
 {% block after%}
 <div class="card-footer">
 
-        <input type="submit" class="btn btn-secondary btn-sm" name="save" value="Сохранить">
+    <input type="submit" class="btn btn-secondary btn-sm" name="save" value="Сохранить">
     {% if user.id == voting.author_id %}
-        <input type="submit" class="btn btn-outline-danger btn-sm float-right" name="delete" value="Удалить">
+    <input type="submit" class="btn btn-outline-danger btn-sm float-right" name="delete" value="Удалить">
     {% endif %}
-    </div>
+</div>
 {{ result }}
 {% endblock %}

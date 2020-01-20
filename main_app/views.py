@@ -1,39 +1,12 @@
+from django.contrib.auth import login, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect
-from django.urls import reverse
 
 from . import models
 from .forms import EditProfileForm
-
-from django.contrib.auth import login, authenticate, update_session_auth_hash
-from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.models import User
-
-# Алфавит составлен из непохожих символов
-url_alph = "23459bfghinpstuwzDFGJLRSUWZ_"
-
-
-def convert_base(num: str, to_base: int = 10, from_base: int = 10,
-                 alph_t: str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-                 alph_f: str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ") -> str:
-    num = str(num)
-    if to_base <= 0:
-        to_base = len(alph_t)
-    if from_base <= 0:
-        from_base = len(alph_f)
-    # A -> 10
-    a = {e: i for i, e in enumerate(alph_f)}
-    # 10 -> A
-    b = dict(enumerate(alph_t))
-    num2, num3 = 0, ""
-    for e in num:
-        num2 *= from_base
-        num2 += a[e]
-    while num2:
-        num3 += b[num2 % to_base]
-        num2 //= to_base
-    return num3[::-1]
 
 
 def get_menu_context(request):
@@ -54,7 +27,7 @@ def get_menu_context(request):
          ]},
         {'url': '/', 'name': 'Моя страница',
          'dropdown': [
-             {'url': '/profile/'+str(request.user.id), 'name': 'Профиль'},
+             {'url': '/profile/' + str(request.user.id), 'name': 'Профиль'},
              {'url': '/edit_profile/', 'name': 'Редактировать'},
              {'url': '/my_votings/', 'name': 'Посмотреть мои'},
              {'url': '/create/', 'name': 'Создать голосование'},
@@ -84,7 +57,7 @@ def home(request):
         'user': request.user,
         'loginform': AuthenticationForm(),
         'main_message': 'Здесь отображаются все голосования',
-        'auth_msg': greeting(request)
+        'auth_msg': greeting(request),
     }
     if False and request:
         context['vote_errors'] = request.errors.vote
@@ -162,11 +135,11 @@ def vote(request):
             if 'delete' in request.POST and request.user.id == curr_vot.author_id:
                 try:
                     curr_vot.delete()
-                    return HttpResponse('Вы успешно удалили голосование')
+                    return redirect('/home/')
                 except:
                     return HttpResponse('Невозможно удалить голосование')
             if 'edit' in request.POST and request.user.id == curr_vot.author_id:
-                return HttpResponseRedirect('/edit/'+str(curr_vot.id))
+                return HttpResponseRedirect('/edit/' + str(curr_vot.id))
 
             if request.user.id in curr_vot.users() or request.user.id in curr_vot.users_text():
                 return HttpResponse('Вы уже голосовали!')
@@ -174,8 +147,8 @@ def vote(request):
             if curr_vot.type == "text_input":
                 if request.POST.get('answer'):
                     answer = models.TextOption(voting_id=curr_vot.id,
-                                            answer=request.POST.get('answer'),
-                                            user_id=request.user.id)
+                                               answer=request.POST.get('answer'),
+                                               user_id=request.user.id)
                     answer.save()
                     return HttpResponseRedirect(curr_vot.voting_view())
                 return HttpResponse("Пустой ответ. Проигнорировано.")
@@ -232,6 +205,7 @@ def voting(request, voting):
     context['main_message'] = 'Просмотр голосования'
 
     return render(request, 'voting.html', context)
+
 
 @login_required()
 def create(request):
@@ -302,11 +276,12 @@ def edit(request, id):
         options = models.Options.objects.filter(voting_id=id)
 
         if request.method == 'POST':
+            print(request.POST)
             for o in options:
-                if ('del_'+str(o.id)) in request.POST:
+                if not ('option_' + str(o.id)) in request.POST:
                     o.delete()
-                elif ('save_'+str(o.id)) in request.POST:
-                    o.option = request.POST.get(str(o.id))
+                else:
+                    o.option = request.POST.get("option_" + str(o.id))
                     o.save()
 
             if 'voting_type' in request.POST:
@@ -323,6 +298,7 @@ def edit(request, id):
             for i in range(1, int(count) + 1):
                 o = models.Options()
                 o.option = request.POST.get('option' + str(i))
+                print(o.option)
                 o.voting = context['voting']
                 o.save()
 
@@ -331,18 +307,25 @@ def edit(request, id):
     return render(request, 'edit.html', context)
 
 
+@login_required()
 def profile(request, id):
+    votes = models.Vote.objects.filter(user_id=request.user.id)
+
     context = {
         'pagetitle': 'Мой профиль',
         'menu': get_menu_context(request),
         'user': request.user,
         'main_message': 'Мой профиль',
         'auth_msg': greeting(request),
-        'id': id
+        'id': id,
+        'votings': models.Voting.objects.filter(author_id=request.user.id),
+        'my_votes': [models.Voting.objects.get(id=v.voting_id) for v in votes]
     }
+
     return render(request, 'profile.html', context)
 
 
+@login_required()
 def edit_profile(request):
     context = {
         'pagetitle': 'Мой профиль',
@@ -356,13 +339,14 @@ def edit_profile(request):
 
         if form.is_valid():
             form.save()
-            return redirect('/profile/'+str(context['user'].id))
+            return redirect('/profile/' + str(context['user'].id))
     else:
         form = EditProfileForm(instance=request.user)
         context['form'] = form
         return render(request, 'edit_profile.html', context)
 
 
+@login_required()
 def change_password(request):
     context = {
         'pagetitle': 'Изменить пароль',
@@ -373,12 +357,11 @@ def change_password(request):
     }
     if request.method == 'POST':
         form = PasswordChangeForm(data=request.POST, user=request.user)
-        print(form)
 
         if form.is_valid():
             form.save()
             update_session_auth_hash(request, form.user)
-            return redirect('/profile/'+str(context['user'].id))
+            return redirect('/profile/' + str(context['user'].id))
         else:
             return redirect('/password/')
     else:

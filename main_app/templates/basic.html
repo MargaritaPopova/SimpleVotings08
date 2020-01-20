@@ -10,44 +10,47 @@
         {% endblock %}
     </title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" >
+    <link href="https://fonts.googleapis.com/css?family=Nunito&display=swap" rel="stylesheet">
+    <!--<link rel="stylesheet" href="{% static 'css/style.css' %}">-->
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 
 </head>
 <body>
-    <header>
-        {% block menu %}
-        {% include 'menu.html' %}
-        {% endblock %}
-    </header>
-    <!-- /header -->
-    <div class="container">
-        <main>
-        {% block alert %}
-            {% include 'greeting.html' %}
-        {% endblock %}
-
-        <div class="card text-white bg-secondary my-3 py-2 text-center">
-          <div class="card-body">
-            <p class="text-white m-0"> {{ main_message }}</p>
-          </div>
-        </div>
-
-            {% block main %}
-            {% endblock %}
-        </main>
-    </div>
-    <footer class="footer pt-4 pb-3 bg-dark">
-    {% block footer %}
-        <div class="container">
-                <p class="text-muted align-bottom"> <a href="/about/" title="" class="text-light">&copy; BackPacMan Team</a> - The Two Coders.</p>
-        </div>
+<header>
+    {% block menu %}
+    {% include 'menu.html' %}
     {% endblock %}
-    </footer>
+</header>
+<!-- /header -->
+<div class="container">
+    <main>
+        {% block alert %}
+        {% include 'greeting.html' %}
+        {% endblock %}
 
-    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
-    <script src="{% static 'vendor/bootstrap/js/popper.min.js' %}"></script>
-    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-    {% block custom_js %} {% endblock %}
+        <div class="card bg-light my-3 py-2 text-center">
+            <div class="card-body">
+                <p class="text-dark m-0"> {{ main_message }}</p>
+            </div>
+        </div>
+
+        {% block main %}
+        {% endblock %}
+    </main>
+</div>
+<footer class="footer pt-3 bg-dark">
+    {% block footer %}
+    <div class="container">
+        <p class="text-muted"><a href="/about/" title="" class="text-light">&copy; BackPacMan Team</a> - The Two Coders.
+        </p>
+    </div>
+    {% endblock %}
+</footer>
+
+<script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'vendor/bootstrap/js/popper.min.js' %}"></script>
+<script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+{% block custom_js %} {% endblock %}
 </body>
 </html>
