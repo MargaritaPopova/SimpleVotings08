@@ -29,8 +29,6 @@ def get_menu_context(request):
          'dropdown': [
              {'url': '/profile/' + str(request.user.id), 'name': 'Профиль'},
              {'url': '/edit_profile/', 'name': 'Редактировать'},
-             {'url': '/my_votings/', 'name': 'Посмотреть мои'},
-             {'url': '/create/', 'name': 'Создать голосование'},
          ]},
         {'url': '/about/', 'name': 'О нас'},
     ]
@@ -40,7 +38,7 @@ def get_menu_context(request):
 def greeting(request):
     if request.user.is_authenticated:
         if request.user.first_name:
-            auth_msg = 'Добро пожаловать, {}!'.format(request.user.first_name)
+            auth_msg = 'Добро пожаловать, {} {}!'.format(request.user.first_name, request.user.last_name)
         else:
             auth_msg = 'Добро пожаловать, {}!'.format(request.user)
     else:
@@ -58,6 +56,7 @@ def home(request):
         'loginform': AuthenticationForm(),
         'main_message': 'Здесь отображаются все голосования',
         'auth_msg': greeting(request),
+        'expand': True
     }
     if False and request:
         context['vote_errors'] = request.errors.vote
@@ -128,14 +127,12 @@ def signup_view(request):
 @login_required
 def vote(request):
     if request.method == "POST":
-        curr_vot = models.Voting.objects.get(id=request.POST.get('voting_id', -1))
-        if not curr_vot:
-            return HttpResponse('Голосование не найдено!')
-        else:
+        try:
+            curr_vot = models.Voting.objects.get(id=request.POST.get('voting_id', -1))
             if 'delete' in request.POST and request.user.id == curr_vot.author_id:
                 try:
                     curr_vot.delete()
-                    return redirect('/home/')
+                    return HttpResponse('Голосование удалено')
                 except:
                     return HttpResponse('Невозможно удалить голосование')
             if 'edit' in request.POST and request.user.id == curr_vot.author_id:
@@ -180,29 +177,34 @@ def vote(request):
                             voting_id=curr_vot.id).save()
 
             return HttpResponseRedirect(curr_vot.voting_view())
-
+        except:
+            return HttpResponse('Голосование не найдено!')
     return HttpResponseRedirect('/')
 
 
 def voting(request, voting):
     context = {'answers': []}
-    v = models.Voting.objects.get(id=voting)
-    if v:
+    try:
+        v = models.Voting.objects.get(id=voting)
+        context['voting'] = v
         if v.type == 'text_input':
-            ans = models.TextOption.objects.filter(voting_id=voting)
-            if len(ans):
+            try:
+                ans = models.TextOption.objects.filter(voting_id=voting)
                 for a in ans:
                     context['answers'].append({
                         'user': User.objects.get(id=a.user_id).username,
                         'answer': a.answer
                     })
                 context['user_input'] = ans.get(user_id=request.user.id).answer
-
+            except:
+                context['answers'] = 'Ответов еще не было'
+    except:
+        return HttpResponse('Голосование не найдено!')
     context['pagetitle'] = 'Просмотр голосования'
-    context['voting'] = v
     context['menu'] = get_menu_context(request)
     context['auth_msg'] = greeting(request)
     context['main_message'] = 'Просмотр голосования'
+    context['expand'] = False
 
     return render(request, 'voting.html', context)
 
@@ -237,7 +239,6 @@ def create(request):
     context = {
         'menu': get_menu_context(request),
         'pagetitle': 'Создание голосования',
-        'main_message': 'Создание голосования',
         'auth_msg': greeting(request)
     }
     return render(request, 'create.html', context)
@@ -252,7 +253,8 @@ def my_votings(request):
         'user': request.user,
         'loginform': AuthenticationForm(),
         'main_message': 'Мои голосования',
-        'auth_msg': greeting(request)
+        'auth_msg': greeting(request),
+        'expand': True
     }
     if False and request:
         context['vote_errors'] = request.errors.vote
@@ -260,18 +262,36 @@ def my_votings(request):
     return render(request, 'my_votings.html', context)
 
 
+def voting_types(type):
+    types = [
+        {'type': 'radio', 'value': 'С единственным выбором'},
+        {'type': 'checkbox', 'value': 'С множественным выбором'},
+        {'type': 'text_input', 'value': 'Свободный ответ'},
+    ]
+    if type == 'radio':
+        return types
+    elif type == 'checkbox':
+        types = [types[1], types[2], types[0]]
+    else:
+        types = [types[2], types[0], types[1]]
+    return types
+
+
 @login_required()
 def edit(request, id):
+    v = models.Voting.objects.get(id=id)
     context = {
-        'voting': models.Voting.objects.get(id=id),
+        'voting': v,
         'pagetitle': 'Редактировать голосование',
         'menu': get_menu_context(request),
         'user': request.user,
         'main_message': 'Редактировать голосование',
         'auth_msg': greeting(request),
         'result': '',
-        'id': id
+        'id': id,
+        'voting_types': voting_types(v.type)
     }
+
     if request.user.id == context['voting'].author_id:
         options = models.Options.objects.filter(voting_id=id)
 
@@ -302,6 +322,10 @@ def edit(request, id):
                 o.voting = context['voting']
                 o.save()
 
+            title = request.POST.get('title')
+            context['voting'].question = title
+            context['voting'].save()
+
             return redirect(context['voting'].voting_view())
 
     return render(request, 'edit.html', context)
@@ -319,7 +343,8 @@ def profile(request, id):
         'auth_msg': greeting(request),
         'id': id,
         'votings': models.Voting.objects.filter(author_id=request.user.id),
-        'my_votes': [models.Voting.objects.get(id=v.voting_id) for v in votes]
+        'my_votes': {models.Voting.objects.get(id=v.voting_id) for v in votes},
+        'expand': True
     }
 
     return render(request, 'profile.html', context)
@@ -340,6 +365,8 @@ def edit_profile(request):
         if form.is_valid():
             form.save()
             return redirect('/profile/' + str(context['user'].id))
+        else:
+            return HttpResponse('Что-то пошло не так с: {}'.format(form.errors))
     else:
         form = EditProfileForm(instance=request.user)
         context['form'] = form
@@ -363,7 +390,7 @@ def change_password(request):
             update_session_auth_hash(request, form.user)
             return redirect('/profile/' + str(context['user'].id))
         else:
-            return redirect('/password/')
+            return HttpResponse('Что-то пошло не так с: {}'.format(form.errors))
     else:
         form = PasswordChangeForm(user=request.user)
         context['form'] = form

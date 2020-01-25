@@ -1,1 +1,0 @@
-# SimpleVotings08

@@ -11,13 +11,6 @@
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav ml-auto">
 
-                {% for item in menu.0 %}
-                <li class="nav-item active">
-                    <a class="nav-link" href="{{item.url}}">{{ item.name }}
-                        <span class="sr-only">(current)</span>
-                    </a>
-                </li>
-                {% endfor %}
 
                 {% for item in menu %}
                 {% if item.dropdown %}
@@ -38,6 +31,14 @@
                     <a class="nav-link" href="{{item.url}}">{{ item.name }}</a>
                 </li>
                 {% endif %}
+                {% endfor %}
+
+                {% for item in menu.0 %}
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{item.url}}">{{ item.name }}
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
                 {% endfor %}
             </ul>
         </div>

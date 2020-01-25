@@ -6,7 +6,7 @@ function add_option() {
     counter.value = Number(counter.value) + 1;
 
     let p = document.createElement('div');
-    p.className = 'row card-text mt-2';
+    p.className = 'container row card-text mt-2';
 
     inp = document.createElement('input');
     inp.type = 'text';

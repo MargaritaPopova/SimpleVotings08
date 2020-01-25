@@ -4,6 +4,7 @@
 {% load static %}
 <script src="{% static 'js/create.js' %}"></script>
 {% endblock %}
-{% include 'forms/edit.html' with action='#' %}
-
+<div class="mb-4">
+    {% include 'forms/edit.html' with action='#' %}
+</div>
 {% endblock %}

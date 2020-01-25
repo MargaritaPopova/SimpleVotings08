@@ -1,9 +1,5 @@
 {% extends './basic.html' %}
-{% block before %}
-<h6 class="card-subtitle mb-2 text-muted">Автор: {{ voting.author }}</h6>
-<h4 class="card-title"><a href={{ voting.voting_view }} class="text-dark"> {{ voting.question }}</a></h4>
-<input type="hidden" name="voting_id" value="{{ voting.id }}">
-{% endblock %}
+
 {% block main %}
 {% if voting.type == 'text_input' %}
 <p><label {% if user.id in voting.users %}title="(Ответили: {{ voting.users|length }})" {% endif %}>
@@ -57,7 +53,7 @@
     {% endif %}
     {% if user.id == voting.author_id %}
     <input type="submit" class="btn btn-outline-success btn-sm mr-1 mt-1" name="edit" value="Редактировать">
-    <input type="submit" class="btn btn-outline-danger btn-sm mt-1" name="delete" value="Удалить">
+    <input type="submit" class="btn btn-outline-danger btn-sm mt-1" name="delete" value="Удалить" onclick="delete_warning()">
     {% endif %}
 </div>
 {% endblock %}

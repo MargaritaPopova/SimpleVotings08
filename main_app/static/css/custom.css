@@ -4,6 +4,7 @@ body {
   min-height:100%;
   position:relative;
   padding-bottom: 60px;
+  background-image: url("./images/img.png");
 }
 .footer {
   position: absolute;
@@ -12,3 +13,12 @@ body {
   bottom: 0;
   height: 60px;
 }
+.card-header:hover {
+    cursor: pointer;
+    background-color: #e1e5ea;
+}
+dt {
+    font-family: 'PT Sans', sans-serif
+}
+
+

@@ -1,35 +1,36 @@
 {% extends "basic.html" %}
 {% block title%}Регистрация{%endblock%}
+{% block message %} {% endblock %}
 {% block main %}
-<div class="card bg-light mb-4">
+<div class="card bg-light my-4">
     <div class="card-body">
-    <h2>Регистрация</h2>
-            <div class="col-md-6">
-                <form method="POST">
-                        <div class="row">
-                            {% csrf_token %}
-                            {% for field in form %}
-                            <div class="col-xs-12">
-                                <strong>{{ field.label_tag }}</strong><br>
-                                {{ field }}
-                                {% if field.help_text %}
-                                <br><small style="color: grey">{{ field.help_text }}</small>
-                                {% endif %}
-                                {% for error in field.errors %}
-                                <p style="color: red">{{ error }}</p>
-                                {% endfor %}
-                            </div>
-                            {% endfor %}
-                        </div>
-                    <button type="submit" class="btn btn-dark">Зарегистрироваться</button>
-                </form>
-            </div>
-    <br>
-    <hr>
-    <p>Уже есть аккаунт? <a href="/login/">Войдите</a>
+        <h2>Регистрация</h2>
+        <div class="col-md-6">
+            <form method="POST">
+                <div class="row">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div class="col-xs-12">
+                        <strong>{{ field.label_tag }}</strong><br>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <br><small style="color: grey">{{ field.help_text }}</small>
+                        {% endif %}
+                        {% for error in field.errors %}
+                        <p style="color: red">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn btn-dark">Зарегистрироваться</button>
+            </form>
+        </div>
         <br>
-    <hr>
-    <a href="/">На главную</a>
+        <hr>
+        <p>Уже есть аккаунт? <a href="/login/">Войдите</a>
+            <br>
+        <hr>
+        <a href="/">На главную</a>
     </div>
 </div>
 {%endblock%}

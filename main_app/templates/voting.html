@@ -1,8 +1,15 @@
 {% extends "basic.html" %}
+{% block custom_js %}
+{% load static %}
+<script src="{% static 'js/warning.js' %}"></script>
+{% endblock%}
+
 {% block main %}
-{% if voting.type == 'text_input' %}
-{% include 'forms/voting_text.html' with action="/vote/" %}
-{% else %}
-{% include 'forms/voting_basic.html' with action="/vote/" %}
-{% endif %}
+<div class="mb-4">
+    {% if voting.type == 'text_input' %}
+    {% include 'forms/voting_text.html' with action="/vote/" %}
+    {% else %}
+    {% include 'forms/voting_basic.html' with action="/vote/" %}
+    {% endif %}
+</div>
 {% endblock %}

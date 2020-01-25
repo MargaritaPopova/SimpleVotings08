@@ -30,26 +30,35 @@
 
                 </ul>
             </div>
-            <div class="tab-pane fade show active" id="nav-votings" role="tabpanel" aria-labelledby="nav-votings-tab">
-                {% if votings %}
-                <div class="card-columns px-2 py-2">
-                    {% for voting in votings %}
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="nav-votings" role="tabpanel"
+                     aria-labelledby="nav-votings-tab">
+                    {% if votings %}
+                    <div class="card-columns px-2 py-2">
+                        {% for voting in votings %}
 
-                    {% include 'forms/voting_basic.html' with action="/vote/"%}
-                    {% endfor %}
+                        {% include 'forms/voting_basic.html' with action="/vote/"%}
+                        {% endfor %}
+                    </div>
+
+                    {% else %}
+                    <p class="card-text">Вы еще не создавали голосований. Чтобы создать, <a href="/create/">нажмите
+                        сюда </a></p>
+                    {% endif %}
                 </div>
+                <div class="tab-pane fade" id="nav-votes" role="tabpanel" aria-labelledby="nav-votes-tab">
+                    {% if my_votes %}
+                    <div class="card-columns px-2 py-2">
+                        {% for voting in my_votes %}
 
-                {% else %}
-                <p class="card-text">Вы еще не создавали голосований. Чтобы создать, <a href="/create/">нажмите
-                    сюда </a></p>
-                {% endif %}
-            </div>
-            <div class="tab-pane fade" id="nav-votes" role="tabpanel" aria-labelledby="nav-votes-tab">
-                <div class="card-columns px-2 py-2">
-                    {% for voting in my_votes %}
-
-                    {% include 'forms/voting_basic.html' with action="/vote/"%}
-                    {% endfor %}
+                        {% include 'forms/voting_basic.html' with action="/vote/"%}
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="card-text">Вы еще не оставляли голосов. Чтобы посмотреть доступные голосования, <a
+                            href="/home/">нажмите
+                        сюда </a></p>
+                    {% endif %}
                 </div>
             </div>
 

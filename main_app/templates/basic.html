@@ -11,6 +11,7 @@
     </title>
     {% load static %}
     <link href="https://fonts.googleapis.com/css?family=Nunito&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans&display=swap" rel="stylesheet">
     <!--<link rel="stylesheet" href="{% static 'css/style.css' %}">-->
     <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
@@ -29,11 +30,13 @@
         {% include 'greeting.html' %}
         {% endblock %}
 
+        {% block message %}
         <div class="card bg-light my-3 py-2 text-center">
             <div class="card-body">
                 <p class="text-dark m-0"> {{ main_message }}</p>
             </div>
         </div>
+        {% endblock %}
 
         {% block main %}
         {% endblock %}

@@ -8,8 +8,18 @@
     {% csrf_token %}
     <div class="card mb-5 bg-light">
         <div class="card-body">
-            <hr>
-            {{ form.as_p }}
+            {% for field in form %}
+                    <div class="col-xs-12">
+                        <strong>{{ field.label_tag }}</strong><br>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <br><small style="color: grey">{{ field.help_text }}</small>
+                        {% endif %}
+                        {% for error in field.errors %}
+                        <p style="color: red">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
             <p><a href="/password/">Изменить пароль</a></p>
         </div>
 

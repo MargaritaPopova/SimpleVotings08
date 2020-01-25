@@ -7,9 +7,9 @@
 <div class="my-2">
     <label>Изменить тип голосования:</label>
     <select id="myList" name="voting_type" class="small">
-        <option value="radio">С единственным выбором</option>
-        <option value="checkbox">С множественным выбором</option>
-        <option value="text_input">Свободный ответ</option>
+        {% for type in voting_types %}
+        <option value="{{type.type}}">{{type.value}}</option>
+        {% endfor %}
     </select>
 </div>
 {% csrf_token %}

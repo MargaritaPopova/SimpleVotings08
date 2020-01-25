@@ -1,17 +1,30 @@
-    <form method="{% block method %}{{ method|default:'POST' }}{% endblock %}"
- action="{% block action %}{{ action|default:'/' }}{% endblock %}">
+<form method="{% block method %}{{ method|default:'POST' }}{% endblock %}"
+      action="{% block action %}{{ action|default:'/' }}{% endblock %}" id="voting_form">
     <div class="card bg-light">
-        <div class="card-body">
 
-            {% csrf_token %}
-            {% block before %}{% endblock %}
-            {% block main %}{% endblock %}
+        <div class="card-header" {% if expand %}
+             data-toggle="collapse" href="#voting_{{voting.id}}" role="button" aria-expanded="false"
+             aria-controls="voting_{{voting.id}}" {% endif %}>
+            <h6 class="card-subtitle mb-2 text-muted">Автор:
+                {% if voting.author.first_name %} {{ voting.author.first_name }}
+                {% else %} {{ voting.author }} {% endif %} </h6>
+            <h4 class="card-title"><a href="{{voting.voting_view}}" class="text-dark"> {{ voting.question }}</a></h4>
+            <input type="hidden" name="voting_id" value="{{ voting.id }}">
         </div>
-        {% block after %}
-        {% if not hide_submit %}
-        <input type="submit" value="Голосовать">
-        {% endif %}
-        {% endblock %}
+
+        <div {% if expand %} class="collapse" {% endif %} id="voting_{{voting.id}}">
+            <div class="card-body">
+
+                {% csrf_token %}
+                {% block before %}{% endblock %}
+                {% block main %}{% endblock %}
+            </div>
+            {% block after %}
+            {% if not hide_submit %}
+            <input type="submit" value="Голосовать">
+            {% endif %}
+            {% endblock %}
+        </div>
+
     </div>
-    {{ result }}
-    </form>
+</form>

@@ -7,8 +7,18 @@
     <form action="/login/" method="POST">
         {% csrf_token %}
 
-        <p>{{ form.username.label }} {{ form.username }} {{ form.username.errors }}</p>
-        <p>{{ form.password.label }} {{ form.password }} {{ form.password.errors }}</p>
+        {% for field in form %}
+                    <div class="col-xs-12">
+                        <strong>{{ field.label_tag }}</strong><br>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <br><small style="color: grey">{{ field.help_text }}</small>
+                        {% endif %}
+                        {% for error in field.errors %}
+                        <p style="color: red">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
 
         <input type="submit" value="Войти">
     </form>
