@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth import login, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
@@ -13,6 +14,7 @@ def get_menu_context(request):
     menu_login = []
     if request.user.is_authenticated:
         menu_login.append({'url': '/logout/', 'name': 'Выйти'})
+        menu_login.append({'url': '/profile/'+str(request.user.id), 'name': request.user})
     else:
         menu_login += [{'url': '/signup/', 'name': 'Регистрация'},
                        {'url': '/login/', 'name': 'Войти'}]
@@ -198,11 +200,10 @@ def voting(request, voting):
                 context['user_input'] = ans.get(user_id=request.user.id).answer
             except:
                 context['answers'] = 'Ответов еще не было'
-    except:
-        return HttpResponse('Голосование не найдено!')
+    except models.Voting.DoesNotExist:
+        messages.add_message(request, messages.ERROR, "Такого голосования нет")
     context['pagetitle'] = 'Просмотр голосования'
     context['menu'] = get_menu_context(request)
-    context['auth_msg'] = greeting(request)
     context['main_message'] = 'Просмотр голосования'
     context['expand'] = False
 
@@ -225,6 +226,7 @@ def create(request):
         elif request.POST.get('voting_type') == 'text_input':
             v.type = 'text_input'
         v.save()
+        messages.add_message(request, messages.SUCCESS, "Голосование успешно создано")
 
         count = request.POST.get('count')
 
@@ -239,7 +241,6 @@ def create(request):
     context = {
         'menu': get_menu_context(request),
         'pagetitle': 'Создание голосования',
-        'auth_msg': greeting(request)
     }
     return render(request, 'create.html', context)
 
@@ -253,7 +254,6 @@ def my_votings(request):
         'user': request.user,
         'loginform': AuthenticationForm(),
         'main_message': 'Мои голосования',
-        'auth_msg': greeting(request),
         'expand': True
     }
     if False and request:
@@ -286,7 +286,6 @@ def edit(request, id):
         'menu': get_menu_context(request),
         'user': request.user,
         'main_message': 'Редактировать голосование',
-        'auth_msg': greeting(request),
         'result': '',
         'id': id,
         'voting_types': voting_types(v.type)
@@ -340,7 +339,6 @@ def profile(request, id):
         'menu': get_menu_context(request),
         'user': request.user,
         'main_message': 'Мой профиль',
-        'auth_msg': greeting(request),
         'id': id,
         'votings': models.Voting.objects.filter(author_id=request.user.id),
         'my_votes': {models.Voting.objects.get(id=v.voting_id) for v in votes},
@@ -356,7 +354,6 @@ def edit_profile(request):
         'pagetitle': 'Мой профиль',
         'menu': get_menu_context(request),
         'user': request.user,
-        'auth_msg': greeting(request),
         'main_message': 'Мой профиль',
     }
     if request.method == 'POST':
@@ -380,7 +377,6 @@ def change_password(request):
         'menu': get_menu_context(request),
         'user': request.user,
         'main_message': 'Изменить пароль',
-        'auth_msg': greeting(request)
     }
     if request.method == 'POST':
         form = PasswordChangeForm(data=request.POST, user=request.user)
