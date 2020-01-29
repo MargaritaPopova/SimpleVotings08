@@ -58,7 +58,6 @@ def home(request):
         'user': request.user,
         'loginform': AuthenticationForm(),
         'main_message': 'Здесь отображаются все голосования',
-        'auth_msg': greeting(request),
         'expand': True
     }
     if False and request:
@@ -136,7 +135,7 @@ def vote(request):
                 try:
                     curr_vot.delete()
                     messages.add_message(request, messages.WARNING, 'Голосование удалено')
-                    return redirect('/home/')
+                    return redirect(curr_vot.voting_view())
                 except:
                     return HttpResponse('Невозможно удалить голосование')
             if 'edit' in request.POST and request.user.id == curr_vot.author_id:
@@ -202,7 +201,7 @@ def voting(request, voting):
                 context['user_input'] = ans.get(user_id=request.user.id).answer
             except:
                 context['answers'] = 'Ответов еще не было'
-    except models.Voting.DoesNotExist:
+    except:
         messages.add_message(request, messages.ERROR, "Такого голосования нет")
     context['pagetitle'] = 'Просмотр голосования'
     context['menu'] = get_menu_context(request)

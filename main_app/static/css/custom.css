@@ -17,8 +17,9 @@ body {
     cursor: pointer;
     background-color: #e1e5ea;
 }
-dt {
-    font-family: 'PT Sans', sans-serif
+.alert-error {
+    background-color: #dc3545!important;
 }
+
 
 
