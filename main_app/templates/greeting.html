@@ -1,5 +1,9 @@
 {% if auth_msg %}
 <div class="alert alert-success mt-3">
-    <p>{{ auth_msg }} </p>
+    {{ auth_msg }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
 </div>
+
 {% endif %}

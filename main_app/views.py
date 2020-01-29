@@ -40,12 +40,13 @@ def get_menu_context(request):
 def greeting(request):
     if request.user.is_authenticated:
         if request.user.first_name:
-            auth_msg = 'Добро пожаловать, {} {}!'.format(request.user.first_name, request.user.last_name)
+            messages.add_message(request, messages.SUCCESS,
+                                 'Добро пожаловать, {} {}!'.format(request.user.first_name, request.user.last_name))
         else:
-            auth_msg = 'Добро пожаловать, {}!'.format(request.user)
+            messages.add_message(request, messages.SUCCESS,
+                                 'Добро пожаловать, {}!'.format(request.user))
     else:
-        auth_msg = 'Вы вошли как гость. Чтобы продолжить, нужно авторизоваться'
-    return auth_msg
+        messages.add_message(request, messages.WARNING,'Вы вошли как гость. Чтобы продолжить, нужно авторизоваться')
 
 
 @login_required
@@ -134,7 +135,8 @@ def vote(request):
             if 'delete' in request.POST and request.user.id == curr_vot.author_id:
                 try:
                     curr_vot.delete()
-                    return HttpResponse('Голосование удалено')
+                    messages.add_message(request, messages.WARNING, 'Голосование удалено')
+                    return redirect('/home/')
                 except:
                     return HttpResponse('Невозможно удалить голосование')
             if 'edit' in request.POST and request.user.id == curr_vot.author_id:
@@ -150,14 +152,14 @@ def vote(request):
                                                user_id=request.user.id)
                     answer.save()
                     return HttpResponseRedirect(curr_vot.voting_view())
-                return HttpResponse("Пустой ответ. Проигнорировано.")
+                return HttpResponse("Не сработал ответ в тексте. Пустой ответ. Проигнорировано.")
 
             opt = {e.id: e.option for e in curr_vot.options()}
 
             if curr_vot.type == "radio":
                 tmp = request.POST.get(str(curr_vot.id))
                 if not tmp:
-                    return HttpResponse("Пустой ответ. Проигнорировано.")
+                    return HttpResponse("Нет id варианта в пост-запросе. Пустой ответ. Проигнорировано.")
                 if tmp not in opt.values():
                     return HttpResponse("Значение не найдено! Невозможно выбрать неучтённый вариант!")
                 for k, v in opt.items():
@@ -171,7 +173,7 @@ def vote(request):
                            request.POST.get(str(e)) == opt[e]}
 
             if not answers:
-                return HttpResponse(f"Пустой ответ. Проигнорировано.")
+                return HttpResponse("Не нашел вариантов ответа. Пустой ответ. Проигнорировано.")
 
             for e in answers.keys():
                 models.Vote(option_id=e,
@@ -324,6 +326,7 @@ def edit(request, id):
             title = request.POST.get('title')
             context['voting'].question = title
             context['voting'].save()
+            messages.add_message(request, messages.SUCCESS, "Изменения сохранены")
 
             return redirect(context['voting'].voting_view())
 
