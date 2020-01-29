@@ -11,7 +11,7 @@
 <div class="container-fluid">
     {% for option in voting.options %}
     <div class="row">
-        <div class="col-md-4    ">
+        <div class="col">
             <label {% if user.id in voting.users %}title="{{ option.get_votes_count_t }}" {% endif %}>
 
                 {% if user.id not in voting.users %}
