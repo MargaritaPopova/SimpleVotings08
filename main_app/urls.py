@@ -28,7 +28,6 @@ urlpatterns = [
     path('about/', about),
     path('voting/<str:voting>/', voting),
     path('create/', create),
-    path('my_votings/', my_votings),
     path('edit/<str:id>/', edit),
     path('profile/<str:id>/', profile),
     path('edit_profile/', edit_profile),

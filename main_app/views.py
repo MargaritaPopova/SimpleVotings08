@@ -4,8 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.contrib.auth.models import User
-from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect
-
+from django.shortcuts import render, redirect, HttpResponseRedirect
 from . import models
 from .forms import EditProfileForm
 
@@ -128,6 +127,7 @@ def signup_view(request):
 
 @login_required
 def vote(request):
+    answers = {}
     if request.method == "POST":
         try:
             curr_vot = models.Voting.objects.get(id=request.POST.get('voting_id', -1))
@@ -135,14 +135,15 @@ def vote(request):
                 try:
                     curr_vot.delete()
                     messages.add_message(request, messages.WARNING, 'Голосование удалено')
-                    return redirect(curr_vot.voting_view())
                 except:
-                    return HttpResponse('Невозможно удалить голосование')
+                    messages.add_message(request, messages.ERROR, 'Невозможно удалить голосование')
+                return redirect(curr_vot.voting_view())
             if 'edit' in request.POST and request.user.id == curr_vot.author_id:
                 return HttpResponseRedirect('/edit/' + str(curr_vot.id))
 
             if request.user.id in curr_vot.users() or request.user.id in curr_vot.users_text():
-                return HttpResponse('Вы уже голосовали!')
+                messages.add_message(request, messages.ERROR, 'Вы уже голосовали!')
+                return redirect(curr_vot.voting_view())
 
             if curr_vot.type == "text_input":
                 if request.POST.get('answer'):
@@ -150,17 +151,21 @@ def vote(request):
                                                answer=request.POST.get('answer'),
                                                user_id=request.user.id)
                     answer.save()
-                    return HttpResponseRedirect(curr_vot.voting_view())
-                return HttpResponse("Не сработал ответ в тексте. Пустой ответ. Проигнорировано.")
+                    messages.add_message(request, messages.SUCCESS, 'Ваш голос принят')
+                    return redirect(curr_vot.voting_view())
+                else:
+                    messages.add_message(request, messages.ERROR, 'Пустой ответ. Проигнорировано.')
+                return HttpResponseRedirect(curr_vot.voting_view())
 
             opt = {e.id: e.option for e in curr_vot.options()}
 
             if curr_vot.type == "radio":
                 tmp = request.POST.get(str(curr_vot.id))
                 if not tmp:
-                    return HttpResponse("Нет id варианта в пост-запросе. Пустой ответ. Проигнорировано.")
+                    messages.add_message(request, messages.ERROR, 'Пустой ответ. Проигнорировано.')
                 if tmp not in opt.values():
-                    return HttpResponse("Значение не найдено! Невозможно выбрать неучтённый вариант!")
+                    messages.add_message(request, messages.ERROR,
+                                         "Значение не найдено! Невозможно выбрать неучтённый вариант!")
                 for k, v in opt.items():
                     if tmp == v:
                         answers = {k: v}
@@ -172,16 +177,18 @@ def vote(request):
                            request.POST.get(str(e)) == opt[e]}
 
             if not answers:
-                return HttpResponse("Не нашел вариантов ответа. Пустой ответ. Проигнорировано.")
+                messages.add_message(request, messages.ERROR, 'Пустой ответ. Проигнорировано.')
 
             for e in answers.keys():
                 models.Vote(option_id=e,
                             user_id=request.user.id,
                             voting_id=curr_vot.id).save()
 
+            messages.add_message(request, messages.SUCCESS, 'Ваш голос принят')
             return HttpResponseRedirect(curr_vot.voting_view())
-        except:
-            return HttpResponse('Голосование не найдено!')
+        except models.Voting.DoesNotExist:
+            messages.add_message(request, messages.ERROR, 'Голосование не найдено!')
+            return redirect(curr_vot.voting_view())
     return HttpResponseRedirect('/')
 
 
@@ -244,23 +251,6 @@ def create(request):
         'pagetitle': 'Создание голосования',
     }
     return render(request, 'create.html', context)
-
-
-@login_required()
-def my_votings(request):
-    context = {
-        'pagetitle': 'Мои голосования',
-        'votings': models.Voting.objects.filter(author_id=request.user.id),
-        'menu': get_menu_context(request),
-        'user': request.user,
-        'loginform': AuthenticationForm(),
-        'main_message': 'Мои голосования',
-        'expand': True
-    }
-    if False and request:
-        context['vote_errors'] = request.errors.vote
-
-    return render(request, 'my_votings.html', context)
 
 
 def voting_types(type):
@@ -363,9 +353,11 @@ def edit_profile(request):
 
         if form.is_valid():
             form.save()
+            messages.add_message(request, messages.SUCCESS, "Изменения сохранены!")
             return redirect('/profile/' + str(context['user'].id))
         else:
-            return HttpResponse('Что-то пошло не так с: {}'.format(form.errors))
+            messages.add_message(request, messages.ERROR, form.errors)
+            return redirect('/profile/' + str(context['user'].id))
     else:
         form = EditProfileForm(instance=request.user)
         context['form'] = form
@@ -386,9 +378,11 @@ def change_password(request):
         if form.is_valid():
             form.save()
             update_session_auth_hash(request, form.user)
+            messages.add_message(request, messages.SUCCESS, "Ваш пароль изменён")
             return redirect('/profile/' + str(context['user'].id))
         else:
-            return HttpResponse('Что-то пошло не так с: {}'.format(form.errors))
+            messages.add_message(request, messages.ERROR, form.errors)
+            return redirect('/password/')
     else:
         form = PasswordChangeForm(user=request.user)
         context['form'] = form
