@@ -135,9 +135,10 @@ def vote(request):
                 try:
                     curr_vot.delete()
                     messages.add_message(request, messages.WARNING, 'Голосование удалено')
+                    return redirect('/home/')
                 except:
                     messages.add_message(request, messages.ERROR, 'Невозможно удалить голосование')
-                return redirect(curr_vot.voting_view())
+                    return redirect(curr_vot.voting_view())
             if 'edit' in request.POST and request.user.id == curr_vot.author_id:
                 return HttpResponseRedirect('/edit/' + str(curr_vot.id))
 
