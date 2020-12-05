@@ -23,3 +23,7 @@ jobs:
           
       - name: Run check
         run: python manage.py check
+        
+      - name: Run test
+        run: python manage.py test  
+        
