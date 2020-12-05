@@ -8,5 +8,5 @@ class TestView(TestCase):
       self.response = self.client.get('/')
       
     def test_menu(self):
-      self.assertContains(self.response, 'Login')
+      self.assertContains(self.response, 'Стартовая')
     
